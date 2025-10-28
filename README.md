@@ -20,6 +20,9 @@ This means that you will not write code for OS/161. Instead, you will write and 
 
 :high_brightness: **The answer**: Please, read the assignment description and the code to identify the missing parts that need to be completed. 
 
+### My solution
+Here is a screenshot showing the server terminal & 4 clients.
+![my tmux session with tiles](./tmux.png)
 
 ### If you use the CSE4001 container
 

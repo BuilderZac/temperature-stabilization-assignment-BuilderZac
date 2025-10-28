@@ -7,10 +7,11 @@
 #include <arpa/inet.h>
 #include <stdbool.h>
 #include "utils.h"
+#include <math.h>
 
 
 #define numExternals 4     // Number of external processes
-
+#define thresh 1
 
 int * establishConnectionsFromExternalProcesses()
 {
@@ -103,13 +104,12 @@ int main(void)
     // an array of file descriptors of client sockets.
     int * client_socket = establishConnectionsFromExternalProcesses();
 
+    // Array that stores temperatures from clients
+    float temperature[numExternals];
 
-
+    float curTemp = 0;
     int stable = false;
     while ( !stable ){
-
-        // Array that stores temperatures from clients
-        float temperature[numExternals];
 
         // Receive the messages from the 4 external processes
         for (int i = 0;  i < numExternals; i++){
@@ -121,18 +121,20 @@ int main(void)
             }
 
             temperature[i] = messageFromClient.T;
-            printf("Temperature of External Process (%d) = %f\n", i, temperature[i]);
+            printf("Temperature of External Process (%d) = %.3f\n", i, temperature[i]);
 
         }
 
         // Modify Temperature
-        float updatedTemp = temperature[0] + temperature[1] + temperature[2] + temperature[3];
-        updatedTemp += updatedTemp / 4.0;
+        float sumTemp = temperature[0] + temperature[1] + temperature[2] + temperature[3];
+        curTemp = (2 * curTemp + sumTemp) / 6.0;
+
+        printf("curTemp: %.3f \n", curTemp);
 
 
         // Construct message with updated temperature
         struct msg updated_msg;
-        updated_msg.T = updatedTemp;
+        updated_msg.T = curTemp;
         updated_msg.Index = 0;                // Index of central server
 
 
@@ -144,11 +146,10 @@ int main(void)
             }
         }
 
-        printf("\n");
-
         // Check stability condition
-        if (updatedTemp == 0)
+        if (curTemp >= -thresh && curTemp <= thresh) {
             stable = true;
+        }
 
     }
  
